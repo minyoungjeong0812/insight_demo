@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    HOME
+{% endblock %}
+
+
+{%block content%}
+    <h2 style="color: #1df557"> Select parameters to look for : </h2>
+{%endblock%}
+
+{%block body%}
+
+<form action = "{{url_for('analysis')}}" method="post">
+	<div class="search">
+<select name="parameter">
+<option value="kill">KILL</option>
+  <option value="headshot">HEADSHOT</option>
+  <option value="kill_per_min">KILL_PER_MIN</option>
+	<option value="head_per_kill">HEADSHOT_PER_KILL</option>
+	<option value="damage">DAMAGE</option>
+	<option value="else">DISTANCE</option>
+  </select>
+
+<!--   <input type="text" name="fvalue" required="required"-->
+<!--         placeholder="Select a value" onfocus="this.select()">-->
+
+		<button class="btn btn-primary" onclick="$('#loading').show();">Search</button>
+	</div>
+</form>
+<div id="loading" style="display:none;"><img src="/static/giphy1.gif" alt="" />Loading!</div>
+
+{% endblock %}
+

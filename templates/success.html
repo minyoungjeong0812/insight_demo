@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Results
+{% endblock %}
+
+{% block body %}
+    <h2 style="color: #1df557"> Suspicious users : {{message}} </h2>
+
+<style>
+a:hover {
+  background-color: yellow;
+}
+</style>
+
+<table class="table" style="background-color: rgba(13, 27, 21, 0.6);">
+    <thead>
+      <tr>
+        <th style="color: red;"> UserID </th>
+      </tr>
+    </thead>
+
+    {% for book in bad_user%}
+
+    <tbody>
+      <tr>
+
+        <td>  <a href="{{ url_for('search_res', username=book.username) }}" style="color: red;">{{book.username}}</a> </td>
+
+      </tr>
+    </tbody>
+
+  {%endfor%}
+    </table>
+<button type="button" onclick="window.location.href='{{ url_for( 'home' ) }}';"> Go back </button>
+{% endblock %}

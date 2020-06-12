@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<title>Book details</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<body>
+ <h1>Book details</h1>
+ <ul>
+         <li>ISBN: {{search_res[0][0]}}</li>
+         <li>Title: {{search_res[0][1]}}</li>
+         <li>Author: {{search_res[0][2]}}</li>
+         <li>Year: {{search_res[0][3]}}</li>
+    </ul>
+           
+ <!-- Modal -->
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Your review</h4>
+        </div>
+
+<form method="POST" class="form-border">
+  <div class="modal-minyoung">
+   
+      <h5> 
+      Rating </h5>
+       <div class="form-group col-sm">
+                    <label for="rating">Rate this book</label>
+                    <select id="rating" name="rating" class="form-control" required>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option selected value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+
+        <div class="modal-body">
+          <h5> Review </h5>
+
+          <textarea name="comment" rows="10" cols="50" wrap="soft"> </textarea>
+        </div>
+        <div class="modal-footer">
+
+    
+     <button class="btn btn-success" type="submit">Submit</button>
+  
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+</div>
+</form>
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- {% extends "layout.html" %}
+
+{% block title %}
+   Book details
+{% endblock %}
+
+{% block body %}
+
+    <h1>Book Details</h1>
+
+    <ul>
+         <li>ISBN: {{search_res[0][0]}}</li>
+         <li>Title: {{search_res[0][1]}}</li>
+         <li>Author: {{search_res[0][2]}}</li>
+         <li>Year: {{search_res[0][3]}}</li>
+    </ul>
+ <h2>The review element</h2>
+
+    <p>
+      <h3> 
+      Rating </h3>
+      <span class="starRating">
+        <input id="rating5" type="radio" name="rating" value="5">
+        <label for="rating5">5</label>
+        <input id="rating4" type="radio" name="rating" value="4">
+        <label for="rating4">4</label>
+        <input id="rating3" type="radio" name="rating" value="3" checked>
+        <label for="rating3">3</label>
+        <input id="rating2" type="radio" name="rating" value="2">
+        <label for="rating2">2</label>
+        <input id="rating1" type="radio" name="rating" value="1">
+        <label for="rating1">1</label>
+      </span>
+    </p>
+
+<h3>Your review</h3>>
+  
+<textarea name="text" rows="14" cols="20" wrap="soft"> </textarea>
+      <div class="button">
+      <button type="button" onclick="window.location.href='{{ url_for( 'search' ) }}';">Submit</button>
+    </div>
+
+{% endblock %} -->

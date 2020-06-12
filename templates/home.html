@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial;
+  font-size: 17px;
+}
+
+#myVideo {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+
+ .jb-text { position: absolute; top: 30%; width: 100%; }
+ .jb-text p { margin-top: -24px; text-align: left; padding: 20px ; font-size: 48px; color: #ffffff; }
+
+
+.content {
+  position: fixed;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  color: #f1f1f1;
+  width: 100%;
+  padding: 20px;
+}
+
+#myBtn {
+  width: 200px;
+  font-size: 18px;
+  padding: 10px;
+  border: none;
+  background: #000;
+  color: #fff;
+  cursor: pointer;
+}
+
+#myBtn:hover {
+  background: #ddd;
+  color: black;
+}
+</style>
+</head>
+<body>
+
+<video autoplay muted loop id="myVideo">
+  <!-- <source src="https://www.w3schools.com/howto/rain.mp4" type="video/mp4"> -->
+    <source src={{ url_for('static', filename="video.mp4") }} type="video/mp4">
+  Your browser does not support HTML5 video.
+</video>
+
+<div class ="jb-text">
+<p> Winner Winner
+<span style="color: #ff0000">Cheater</span>
+<span> Finder </span>
+</p>
+</div>
+
+
+<div class="content">
+  <h1>Find Cheaters!</h1>
+  <p>This website allows you to identify cheaters in PUBG games by relying on fancy Bayesian statistics. Upload new user history data, and find who the cheaters are.</p>
+  <button id="myBtn" onclick="myFunction()">Pause</button>
+  <button id="view" type= 'submit' onclick="window.location.href='{{ url_for( '/dashboard0/' ) }}';"> View user data </button>
+  <button type="submit" onclick="window.location.href='{{ url_for( 'upload_csv' ) }}';"> Submit new data </button>
+  <button type="submit" onclick="window.location.href='{{ url_for( 'analysis' ) }}';"> Data analysis </button>
+</div>
+
+<script>
+var video = document.getElementById("myVideo");
+var btn = document.getElementById("myBtn");
+
+function myFunction() {
+  if (video.paused) {
+    video.play();
+    btn.innerHTML = "Pause";
+  } else {
+    video.pause();
+    btn.innerHTML = "Play";
+  }
+}
+</script>
+
+</body>
+</html>
