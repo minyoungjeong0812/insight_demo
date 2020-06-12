@@ -1,150 +1,296 @@
-import os
 import pandas as pd
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras.models import Sequential
-from flask import Flask, request, render_template,url_for,redirect,flash, session
-from flask_session import Session
+import os
+
+from flask import Flask, request, render_template, url_for, redirect, flash
+from flask_session.__init__ import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+from operator import itemgetter
+
+import prac2
+import prac
+
+import preprocess
+import detect
+
+import dash_core_components as dcc
+import dash_html_components as html
+from dash.dependencies import Input, Output
+
+import plotly.graph_objs as go
+
+import werkzeug
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from werkzeug.serving import run_simple
+
 import numpy as np
-import similaritymeasures
-from scipy.spatial.distance import directed_hausdorff
+import csv
+import io
+import dash
+import dash_html_components as html
 
-from scipy.spatial.distance import euclidean
-from fastdtw import fastdtw
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-#sys.path.append(os.path.abspath("./model"))
-#from load import * 
+server = Flask(__name__)
+#DESKTOP
+server._static_folder = "/home/minyoung/Documents/insight_week2/static"
 
-
-#graph = tf.get_default_graph()
-
-app = Flask(__name__)
-
-
-model = keras.models.load_model("assets/model.h5")
-#transformer = joblib.load("assets/data_transformer.joblib")
+#LAPTOP
+#server._static_folder = "/home/minyoung/Downloads/insight_week2/static"
 
 
 # Configure session to use filesystem
-app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
-Session(app)
+server.config["SESSION_PERMANENT"] = False
+server.config["SESSION_TYPE"] = "filesystem"
+Session(server)
 
 # Set up database
-engine = create_engine("postgres://sollsrywssgqwp:3c79a640882fb271f04b87c85e54e09c654059316404be7bcdb671cc6bf7976d@ec2-35-171-31-33.compute-1.amazonaws.com:5432/d77ns8sefglun7")
+engine = create_engine(
+    "postgres://ksfkoirmqqkghq:8843ee1b00e9df0948a10b662918ce11131f75859826aca4fecae08f088fdc8e@ec2-52-207-25-133.compute-1.amazonaws.com:5432/d6k5uvvu11hsqa")
 db = scoped_session(sessionmaker(bind=engine))
 
-#model = load_model('reg_model.h5', custom_objects={'auc': auc})
+###NEED TO INPUT RAW DAMAGE, kill data
+#df_bin = pd.read_sql_query('select * from "all_users"',con=engine)
+df_raw= pd.read_sql_query('select * from "all_users_raw"',con=engine)
+available_indicators = ['kill','headshot','kill_per_min','headshot_per_kill','damage','distance','dbno','assists','heal','boost','revive']
+######################
+dash_app0 = dash.Dash(__name__, server=server, url_base_pathname='/dashboard0/', external_stylesheets=external_stylesheets)
+dash_app1 = dash.Dash(__name__, server=server, url_base_pathname='/dashboard1/', external_stylesheets=external_stylesheets)
 
-@app.route('/', methods=['GET', 'POST'])
+# dash_app0 : my own
+dash_app0.layout = html.Div(children=[
+    html.Div(children='''
+        UserID to graph:
+    '''),
+    dcc.Input(id='input', value='Required field', type='text'),
+
+    html.Div([
+    dcc.Dropdown(id='yaxis-column',options=[{'label': i.upper(), 'value': i} for i in available_indicators],
+                value='kill')], style={'width': '48%', 'float': 'right', 'display': 'inline-block'})
+
+    ,html.Div(id='output-graph'),])
+
+@dash_app0.callback(
+    Output(component_id='output-graph', component_property='children'),
+    [Input(component_id='input', component_property='value'), Input('yaxis-column', 'value')]
+)
+def update_value(input_data, parameter):
+
+    df = df_raw[df_raw['title'] == input_data]
+    df['kill_per_min'] = 60*df['kill']/df['playtime']
+    df['headshot_per_kill'] = df['headshot']/df['kill']
+
+    df.reset_index(inplace=True)
+    df.set_index("playdate", inplace=True)
+    #df = df.drop("Symbol", axis=1)
+    fig = go.Figure(data=go.Scatter(x=df.index,
+                                y=df[parameter], mode='markers',marker_color=df[parameter],text=df['gametype']))
+
+    if len(df)==0:
+        text_to_show = "Cannot find user data"
+    else:
+        text_to_show = input_data + " : " + parameter.upper()
+
+    fig.update_layout(
+        title={
+            'text': text_to_show,
+            'y': 0.9,
+            'x': 0.5,
+            'xanchor': 'center',
+            'yanchor': 'top'})
+
+    return dcc.Graph(id='example-graph',figure=fig)
+
+###########################
+# dash_app1 : my own again
+dash_app1.layout = html.Div([
+    # represents the URL bar, doesn't render anything
+    dcc.Location(id='url', refresh=False),
+
+	html.H2('All user data'),
+
+    html.Div([
+    dcc.Dropdown(id='yaxis-column',options=[{'label': i.upper(), 'value': i} for i in available_indicators],
+                value='kill')], style={'width': '48%'}),
+
+    dcc.Loading(
+        id="loading-1",
+        type="default",
+        children= html.Div(id='output-graph2')),
+
+    html.Div(id='page-content'),
+
+    dcc.Loading(
+        id="loading-2",
+        type="default",
+        children=html.Div([
+        html.Div(id='output-graph', className="six columns"),
+        html.Div(id='output-graph3', className="six columns"),
+    ], className="row"))
+])
+
+@dash_app1.callback([dash.dependencies.Output('page-content', 'children'),Output(component_id='output-graph', component_property='children'),
+                     Output(component_id='output-graph2', component_property='children'), Output(component_id='output-graph3', component_property='children')],
+              [dash.dependencies.Input('url', 'href'),Input('yaxis-column', 'value')])
+
+
+def display_page(pathname,parameter):
+    import urllib.parse
+    parsed_url = urllib.parse.urlparse(pathname)
+    parsed_query = urllib.parse.parse_qs(parsed_url.query)
+    name = parsed_query['username'][0]
+
+    df = df_raw
+
+    df = df[df['gametype'] != 'Event']
+    df['kill_per_min'] = 60*df['kill']/df['playtime']
+    df['headshot_per_kill'] = df['headshot']/df['kill']
+
+    #df['gameplay_date']=df['playdate']
+    df.reset_index(inplace=True)
+    df.set_index("playdate", inplace=True)
+    # #df = df.drop("Symbol", axis=1)
+
+    print(df.transpose())
+    df2 = df[df['title'] == name]
+
+    import plotly.express as px
+
+    # ##Need to assign correct type (kill, kill per min) per each user##
+
+    ##Fig: only suspicious
+    fig = px.histogram(df2, x=parameter, nbins=10, color="gametype", marginal="rug", hover_data=df2.columns)
+
+    fig3 = go.Figure(data=go.Scatter(x=df2.index,y=df2[parameter],mode='markers'))
+
+    ##Fig2: all users
+    fig2 = px.histogram(df, x=parameter, nbins=10, color="gametype", marginal="box", hover_data=df.columns)
+
+    return html.Div([html.H3('Player : {}'.format(name))]), dcc.Graph(id='example-graph',figure=fig,style={'width': '100%', 'display':'inline-block'}),\
+           dcc.Graph(id='example-graph',figure=fig2), dcc.Graph(id='example-graph',figure=fig3,style={'width': '100%', 'display':'inline-block'})
+
+####FLASK####
+@server.route('/')
+def home():
+    return render_template("home.html", message="WORKING")
+
+@server.route('/upload_csv', methods=['GET', 'POST'])
 def upload_csv():
     if request.method == 'POST':
-        csv_file = request.files['file']
-        df = pd.read_csv(csv_file)
-        
-        df_kill=df[['playdate','kill']]
-        df_kill.index=df_kill['playdate']
-        df_kill=df_kill.drop('playdate',axis=1)
-        df=df_kill
+        f = request.files['file']
 
-        train_size = int(len(df) * 0.8)
-        test_size = len(df) - train_size
-        train, test = df.iloc[0:train_size], df.iloc[train_size:len(df)]
+        if not f:
+            return "No file"
 
-        def create_dataset(X, y, time_steps=1):
-        	Xs, ys = [], []
-        	for i in range(len(X) - time_steps):
-        		v = X.iloc[i:(i + time_steps)].values
-        		Xs.append(v)        
-        		ys.append(y.iloc[i + time_steps])
+        df_bin = pd.read_sql_query('select * from "all_users"', con=engine)
 
-        	return np.array(Xs), np.array(ys)
+        df_added = pd.read_csv(f)
+        df2 = prac.df_create(df_added)
 
-        time_steps = 1
-        # reshape to [samples, time_steps, n_features]
-        X_train, y_train = create_dataset(train, train.kill, time_steps)
-        X_test, y_test = create_dataset(test, test.kill, time_steps)
-
-        y_pred = model.predict(X_test)
-
-        in_y_pred=y_pred
-        in_y_test=y_test
-        in_x_test=np.arange(len(y_train), len(y_train) + len(y_test))
-        P_in = np.array([in_x_test, np.squeeze(in_y_pred)]).T
-
-
-        P_reg=np.array([[79.        ,  0.68125933],
-       [80.        ,  0.68125933],
-       [81.        ,  0.68125933],
-       [82.        ,  0.68125933],
-       [83.        ,  0.68125933],
-       [84.        ,  0.91892499],
-       [85.        ,  1.37220061],
-       [86.        ,  0.68125933],
-       [87.        ,  1.15134037],
-       [88.        ,  1.37220061],
-       [89.        ,  1.37220061],
-       [90.        ,  0.68125933],
-       [91.        ,  0.68125933],
-       [92.        ,  0.68125933],
-       [93.        ,  0.91892499],
-       [94.        ,  0.68125933],
-       [95.        ,  0.68125933],
-       [96.        ,  0.68125933],
-       [97.        ,  0.68125933]])
-
-        P_pro=np.array([[15.        ,  3.20631218],
-       [16.        ,  1.37398887],
-       [17.        ,  1.90838337]])
-
-        P_cheat=np.array([[11.        ,  5.55175591],
-       [12.        ,  4.50792074]])
-
-        # dh, ind1, ind2 = directed_hausdorff(P_reg, P_in)
-        # df = similaritymeasures.frechet_dist(P_reg, P_in)
-        # dtw, d = similaritymeasures.dtw(P_reg, P_in)
-        # pcm = similaritymeasures.pcm(P_reg, P_in)
-        # area = similaritymeasures.area_between_two_curves(P_reg, P_in)
-        # cl = similaritymeasures.curve_length_measure(P_reg, P_in)
-        distance, path = fastdtw(P_reg, P_in, dist=euclidean)
-
-        # P_reg_in=[dh,df,dtw,pcm,cl,area]
-
-        val_P_reg_in=distance
-
-        # P_reg_cheat=[85.0860936788796,85.0860936788796,1446.7625213678207,68.78901771141983,8.231848672890777,187.4096377082169]
-        # P_reg_pro=[80.00941090520637,80.00941090520637,1352.1920753596385,44.05548354039518,5.057249788685258,208.3627917431295]
-
-        distance, path = fastdtw(P_reg, P_cheat, dist=euclidean)
-        val_P_reg_cheat=distance
-
-        distance, path = fastdtw(P_reg, P_pro, dist=euclidean)
-        val_P_reg_pro=distance
-
-        if val_P_reg_in > val_P_reg_cheat or (val_P_reg_pro < val_P_reg_in < val_P_reg_cheat):
-        	message="Abnormal"
+        if len(df2.merge(df_bin).drop_duplicates())  == len(df2):
+            flash("You already have this user's data", 'warning')
+            return redirect(url_for('upload_csv'))
         else:
-        	message="Not Abnormal" 
-# all methods will return 0.0 when P and Q are the same
-#print(dh, df, dtw, pcm, cl, area)
+            #got union values in the dataframes#
+            df_final = df_bin.merge(df2, how='outer', indicator=False)
+
+            ##getting existing rows
+            df_existing = df_bin.merge(df2, indicator=False)
+
+            #getting only unique rows in the newly added csv#
+            df_unique=df_bin.merge(df2, how='outer', indicator=True).loc[lambda x : x['_merge'] == 'right_only']
+
+            if len(df_unique) ==0:
+                message="All rows already exist in the database"
+                return render_template('index.html', unique=len(df_unique), dict=df_existing.to_dict(),
+                                       existing=len(df_existing),message=message)
+            else:
+                message = "Done"
+                df_unique=df_unique.drop('_merge',axis=1)
+                df_unique.to_sql('all_users', con=engine, index=False, if_exists='append')
+                df_added.to_sql('all_users_raw', con=engine, index=False, if_exists='append')
+                return render_template('index.html', message=message, unique=len(df_unique), dict=df_unique.to_dict(),existing=len(df2.merge(df_bin)))
+
+    else:
+        #return prac2.print_hello("hareen")
+        return render_template('submit.html')
+
+@server.route('/analysis',methods=['GET', 'POST'])
+def analysis():
+    if request.method == 'POST':
+        df_bin = pd.read_sql_query('select * from "all_users"', con=engine)
+
+        parameter = request.form.get("parameter")
+        print(parameter)
+
+        ratings, usermap = preprocess.load_data(df_bin,parameter)
+
+        name = 'insight_analysis'
+        USE_PRODUCTS=0
+        USE_TIMES=0
+
+        (rating_arr, iat_arr, ids) = preprocess.process_data(ratings,name,USE_PRODUCTS)
+        (rating_arr, iat_arr) = (np.array(rating_arr), np.array(iat_arr))
+
+        ##detect can be pickeld##
+
+        suspn = detect.detect(rating_arr, iat_arr, USE_TIMES, 1)
+        susp_sorted = np.array([(x[0]) for x in sorted(enumerate(suspn), key=itemgetter(1), reverse=True)])
+        bad = susp_sorted[range(10)]
+        bad_rate_ave_5 = np.array([0] * 6, dtype=float)
+        bad_time_ave = np.array([0] * iat_arr.shape[1], dtype=float)
+
+        dict5 = {}
+        dict1 ={}
+        for i in range(len(suspn)):
+            cur = (rating_arr[i, :] / np.sum(rating_arr[i, :]))
+            if i in bad:
+                if cur[0] > cur[5]:
+                    key = usermap[ids[i]]
+                    value = ratings[key]
+                    dict1[key] = value
+                else:
+                    key = usermap[ids[i]]
+                    value = ratings[key]
+                    dict5[key] = value
+
+                    bad_rate_ave_5 += cur
+                bad_time_ave += (iat_arr[i, :] / np.sum(iat_arr[i, :]))
+
+        bad_rate_ave_5 = bad_rate_ave_5 / np.sum(bad_rate_ave_5)
+        bad_time_ave = bad_time_ave / np.sum(bad_time_ave)
+
+        db.execute('TRUNCATE TABLE "bad_user";')
+        db.commit()
+        print("cleared database")
+
+        bad_user_id = list(dict5.keys())
+        bad_df = pd.DataFrame(bad_user_id)
+        bad_df = bad_df.rename(columns={0: 'username'})
+
+        bad_df.to_sql('bad_user', con=engine, index=False, if_exists='append')
+        bad_user = db.execute("SELECT * from bad_user")
+
+        #print(bad_user.fetchall())
+
+        return render_template('success.html', bad_user=bad_user, message=parameter)
+    else:
+        return render_template('analysis_input.html')
 
 
-        return render_template('index.html',in_y_pred=in_y_pred,in_y_test=in_y_test,in_x_test=in_x_test,val_P_reg_cheat=val_P_reg_cheat,val_P_reg_in=val_P_reg_in,val_P_reg_pro=val_P_reg_pro,message=message)
-
-    return """
-            <form method='post' action='/' enctype='multipart/form-data'>
-              Upload a csv file: <input type='file' name='file'>
-              <input type='submit' value='Upload'>
-            </form>
-           """
+@server.route("/analysis/<username>", methods=["GET", "POST"])
+def search_res(username):
+    if request.method == "POST":
+        return "ok"
+    else:
+        return redirect(url_for('/dashboard1/',username=username))
 
 
-@app.route('/success')
-def success():
-	return render_template("home.html")
+app = DispatcherMiddleware(server, {
+    '/mydash': dash_app0.server, '/mydash2': dash_app1.server
+})
 
-if __name__ == '__main__':
-    #db.create_all()
-    app.run(debug=True)
+run_simple('127.0.0.1', 8080, app, use_reloader=True, use_debugger=True)
+#if __name__ == '__main__':
+    # db.create_all()
+    #app.run_server(debug=True)
