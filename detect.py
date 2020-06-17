@@ -63,14 +63,15 @@ def kl_denom(alpha, beta):
 
 
 
-def detect(rating_arr, iat_arr, use_times, K):
+def detect(rating_arr, use_times, K):
 	m = rating_arr.shape[0]
-
+	print(rating_arr)
 	rating_sums = rating_arr.sum(axis=1) + 0.1
+	#print(rating_sums)
 	rating_normal = rating_arr / rating_sums[:, np.newaxis]
-	iat_sums = iat_arr.sum(axis=1) + 0.1
-	iat_normal = iat_arr / iat_sums[:, np.newaxis]
-	user_normal = np.concatenate((rating_normal, iat_normal), axis=1)
+	#iat_sums = iat_arr.sum(axis=1) + 0.1
+	#iat_normal = iat_arr / iat_sums[:, np.newaxis]
+	user_normal = rating_normal
 
 	est = KMeans(n_clusters=K)
 	est.fit(user_normal)
@@ -80,9 +81,9 @@ def detect(rating_arr, iat_arr, use_times, K):
 	pi = [None] * K
 	zn = np.array([-1] * m) # z_next
 	(m, S1) = rating_arr.shape
-	(m, S2) = iat_arr.shape
+	#(m, S2) = iat_arr.shape
 	alpha1 = np.array([[0] * S1 for _ in range(K)], dtype=float)
-	alpha2 = np.array([[0] * S2 for _ in range(K)], dtype=float)
+	#alpha2 = np.array([[0] * S2 for _ in range(K)], dtype=float)
 
 	NUM_FIT_ITERS = 100
 	for it in range(NUM_FIT_ITERS):
@@ -90,25 +91,24 @@ def detect(rating_arr, iat_arr, use_times, K):
 		for k in range(K):
 			cur_idx = np.array((z == k))
 			rating_sub = rating_arr[cur_idx, :]
-			iat_sub = iat_arr[cur_idx, :]
+			#iat_sub = iat_arr[cur_idx, :]
 			n_k = np.sum(cur_idx)
 			pi[k] = n_k / m
 			if n_k > rating_arr.shape[0]:
-				sample_idx = np.array(random.sample(range(n_k), 1000))
+				sample_idx = np.array(random.sample(range(n_k), rating_arr.shape[0]))
 			else:
 				sample_idx = range(n_k)
 			#print ("subset size is ", len(sample_idx))
 			rating_sub = rating_sub[sample_idx, :]
-			iat_sub = iat_sub[sample_idx, :]
+			#iat_sub = iat_sub[sample_idx, :]
 			alpha1[k,:] = fit_alpha(rating_sub)
-			alpha2[k,:] = fit_alpha(iat_sub)
+			#alpha2[k,:] = fit_alpha(iat_sub)
 		#print (" alpha1 = ", alpha1)
 		#print (" alpha2 = ", alpha2)
 
 		#print ("fitting points")
 		for i in range(m):
-			log_likes = [(ldirich_multi_pdf(rating_arr[i, :], alpha1[k]) +
-						  ldirich_multi_pdf(iat_arr[i, :], alpha2[k])) for k in range(K)]
+			log_likes = [(ldirich_multi_pdf(rating_arr[i, :], alpha1[k])) for k in range(K)]
 			zn[i] = log_likes.index(max(log_likes))
 		num_diff = sum(abs(zn - z))
 		z = zn
@@ -117,40 +117,19 @@ def detect(rating_arr, iat_arr, use_times, K):
 			break
 
 	post_rating = np.array(rating_arr, dtype='float')
-	post_iat = np.array(iat_arr, dtype='float')
+	#post_iat = np.array(iat_arr, dtype='float')
 	for i in range(m):
 		post_rating[i,:] += alpha1[z[i]]
-		post_iat[i,:] += alpha2[z[i]]
+		#post_iat[i,:] += alpha2[z[i]]
 
 	susp1 = np.zeros(m)
-	susp2 = np.zeros(m)
+	#susp2 = np.zeros(m)
 	for i in range(m):
 		if i % 100000 == 0: print (i)
 		susp1[i] = max([kl_denom(post_rating[i,:], alpha1[k,:]) for k in range(K)])
-		susp2[i] = max([kl_denom(post_iat[i,:], alpha2[k,:]) for k in range(K)])
+		#susp2[i] = max([kl_denom(post_iat[i,:], alpha2[k,:]) for k in range(K)])
 
 	susp1n = susp1 / np.std(susp1)
-	susp2n = susp2 / np.std(susp2)
-	suspn = susp1n + (susp2n if use_times else 0)
+	#susp2n = susp2 / np.std(susp2)
+	suspn = susp1n
 	return suspn
-
-# pic_detect = pickle.dumps (detect)
-# pic_suspn = pickle.loads(pic_detect)(rating_arr, iat_arr, USE_TIMES, 1)
-
-
-
-
-# USE_PRODUCTS = 0
-# USE_TIMES = 1
-# keyword = 'prod' if USE_PRODUCTS else 'user'
-#
-# # dataname = 'itunes'
-# ratings, usermap = load_itunes(USE_PRODUCTS)
-# dataname = 'flipkart'
-# #ratings, usermap = load_flipkart(USE_PRODUCTS)
-# (rating_arr, iat_arr, ids) = process_data(ratings, dataname, USE_PRODUCTS)
-# (rating_arr, iat_arr) = (np.array(rating_arr), np.array(iat_arr))
-#
-# suspn = detect(rating_arr, iat_arr, USE_TIMES, 1)
-# print("")
-# print("result:  " , suspn)

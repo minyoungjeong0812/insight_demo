@@ -11,7 +11,9 @@ User submission page
 {{message}} </h1>
 
 <h2 style="color: #ff0000">
-Result : Added {{unique}} row(s) to database. {{existing}} rows were already in the database.
+Result : Added {{unique}} row(s) to database.
 </h2>
+
+<button type="button" onclick="window.location.href='{{ url_for( 'check' ) }}';"> Go back </button>
 
 {%endblock%}

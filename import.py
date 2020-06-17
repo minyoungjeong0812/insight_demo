@@ -10,7 +10,7 @@ db = scoped_session(sessionmaker(bind=engine))
 def main():
 	
 	#reg = open("df1.csv")
-	reg= open("dummy.csv")
+	reg= open("export_dataframe4.csv")
 
 	reader_reg = csv.reader(reg)
 	next(reader_reg,None)
@@ -18,9 +18,10 @@ def main():
 	print("iterating")
 
 
-	for playdate,gametype,headshot,playtime,title,kill,damage,distance,walking_distance,ride_distance,DBNO,assists,heal,boost,revive,kill_per_min,head_per_kill in reader_reg:
-		#print(DBNO)
-		db.execute("INSERT INTO pros (playdate,gametype,headshot,playtime,title,kill,damage,distance,walking_distance,ride_distance,DBNO,assists,heal,boost,revive,kill_per_min,head_per_kill) VALUES (:playdate, :gametype, :headshot, :playtime,:title,:kill,:damage,:distance,:walking_distance,:ride_distance,:DBNO,:assists,:heal,:boost,:revive,:kill_per_min,:head_per_kill)",{"playdate": playdate, "gametype": gametype, "headshot": headshot,"playtime": playtime,"title": title, "kill": kill, "damage": damage,"distance": distance,"walking_distance": walking_distance,"ride_distance": ride_distance,"DBNO": DBNO,"assists": assists,"heal": heal,"boost": boost,"revive": revive,"kill_per_min":kill_per_min,"head_per_kill":head_per_kill})
+	for playdate,gametype,headshot,playtime,title,kill,damage,distance,walking_distance,ride_distance,dbno,assists,heal,boost,revive in reader_reg:
+		
+		db.execute("INSERT INTO all_users_raw (playdate,gametype,headshot,playtime,title,kill,damage,distance,walking_distance,ride_distance,dbno,assists,heal,boost,revive) VALUES (:playdate, :gametype, :headshot, :playtime ,:title, :kill, :damage, :distance, :walking_distance, :ride_distance, :dbno, :assists, :heal, :boost, :revive)",
+			{"playdate": playdate, "gametype": gametype, "headshot": headshot, "playtime": playtime, "title": title, "kill": kill, "damage": damage,"distance": distance,"walking_distance": walking_distance,"ride_distance": ride_distance,"dbno": dbno,"assists": assists, "heal": heal, "boost": boost, "revive": revive})
 		print(f"Added user: {title}")
 	db.commit()
 	

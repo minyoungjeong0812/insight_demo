@@ -6,7 +6,7 @@
 
 
 {%block content%}
-    <h2 style="color: #1df557"> Select parameters to look for : </h2>
+    <h2 style="color: #1df557"> Select parameters and # of suspicious users to detect : </h2>
 {%endblock%}
 
 {%block body%}
@@ -19,11 +19,14 @@
   <option value="kill_per_min">KILL_PER_MIN</option>
 	<option value="head_per_kill">HEADSHOT_PER_KILL</option>
 	<option value="damage">DAMAGE</option>
-	<option value="else">DISTANCE</option>
   </select>
 
-<!--   <input type="text" name="fvalue" required="required"-->
-<!--         placeholder="Select a value" onfocus="this.select()">-->
+		<select name="target">
+<option value="10">10</option>
+  <option value="20">20</option>
+  <option value="30">30</option>
+  </select>
+
 
 		<button class="btn btn-primary" onclick="$('#loading').show();">Search</button>
 	</div>
@@ -31,4 +34,3 @@
 <div id="loading" style="display:none;"><img src="/static/giphy1.gif" alt="" />Loading!</div>
 
 {% endblock %}
-
