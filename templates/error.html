@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Error
+{% endblock %}
+
+{% block body %}
+    <h1 style="color: red;">Error</h1>
+  <h2 style="color: yellow;"> The user cannot be found.
+  Make sure you enter correct user ID. </h2>
+
+  <button type="button" onclick="window.location.href='{{ url_for( 'check' ) }}';"> Go back </button>
+
+
+
+{% endblock %}

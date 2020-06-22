@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Book finding results
+{% endblock %}
+
+{% block body %}
+    <h1>Matching books</h1>
+ 
+<style>
+a:hover {
+  background-color: yellow;
+}
+</style>
+
+<table class="table">
+    <thead>
+      <tr>
+        <th> ISBN </th>
+        <th> Title </th>
+        <th> Author </th>
+        <th> Year </th>
+        <th> GoodReads Review </th>
+      </tr>
+    </thead>
+    
+    {% for book in book_isbn%}
+
+    <tbody>
+      <tr>
+      
+        <td>  <a href="{{ url_for('search_res', isbn=book.isbn) }}">{{book.isbn}}</a> </td>
+      
+        <td>{{book.title}}</td>
+        <td>{{book.author}}</td>
+        <td>{{book.year}}</td>
+
+        <td></td>
+     
+      </tr>
+    </tbody>
+
+  {%endfor%}
+    </table>
+<button type="button" onclick="window.location.href='{{ url_for( 'index' ) }}';"> Go back </button>
+{% endblock %}
