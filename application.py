@@ -52,9 +52,6 @@ engine = create_engine(
     "postgres://ksfkoirmqqkghq:8843ee1b00e9df0948a10b662918ce11131f75859826aca4fecae08f088fdc8e@ec2-52-207-25-133.compute-1.amazonaws.com:5432/d6k5uvvu11hsqa")
 db = scoped_session(sessionmaker(bind=engine))
 
-###NEED TO INPUT RAW DAMAGE, kill data
-#df_bin = pd.read_sql_query('select * from "all_users"',con=engine)
-df_raw= pd.read_sql_query('select * from "all_users_raw"',con=engine)
 
 available_indicators = ['kill','headshot','kill_per_min','headshot_per_kill','damage']
 ######################
@@ -65,7 +62,7 @@ dash_app1.layout = html.Div([
     # represents the URL bar, doesn't render anything
     dcc.Location(id='url', refresh=False),
 
-	html.H2('All user data'),
+	html.H2('All user data + Searched player data'),
 
     html.Div([
     dcc.Dropdown(id='yaxis-column',options=[{'label': i.upper(), 'value': i} for i in available_indicators],
@@ -96,21 +93,20 @@ def display_page(pathname,parameter):
     parsed_url = urllib.parse.urlparse(pathname)
     parsed_query = urllib.parse.parse_qs(parsed_url.query)
     name = parsed_query['username'][0]
-
-    df = df_raw[['playdate','playtime','title','gametype','kill','headshot','damage']]
+    df=pd.read_sql_query('select playdate, playtime, title, gametype,kill,headshot,damage from "all_users_raw"',con=engine).drop_duplicates(subset=['playdate', 'gametype', 'headshot', 'playtime'])
 
     df = df[df['gametype'] != 'Event']
     df['kill_per_min'] = 60*df['kill']/df['playtime']
     df['headshot_per_kill'] = df['headshot']/df['kill']
+    df['title2']=df['title'].str.lower()
 
-    #df['gameplay_date']=df['playdate']
     df.reset_index(inplace=True)
     df.set_index("playdate", inplace=True)
-    # #df = df.drop("Symbol", axis=1)
 
+    df2 = df[df['title2'] == name.lower()]
 
-    df2 = df[df['title'] == name]
-    print(df2)
+    dfg=df.groupby('gametype')
+    print(dfg.ngroups)
 
     import plotly.express as px
 
@@ -120,9 +116,53 @@ def display_page(pathname,parameter):
     fig3 = go.Figure(data=go.Scatter(x=df2.index,y=df2[parameter],mode='markers'))
 
     ##Fig2: all users
-    fig2 = px.histogram(df.sample(n=10000), x=parameter, nbins=10, color="gametype", marginal="box", hover_data=df.columns)
+    from plotly.subplots import make_subplots
+    fig2 = make_subplots(
+    rows=4, cols=2,shared_xaxes=False, vertical_spacing=0.1,
+    subplot_titles=("Squad", "Duo", "Solo", "Ranked FPP","Solo FPP","Duo FPP","Squad FPP"))
 
-    return html.Div([html.H3('Player : {}'.format(name))]), dcc.Graph(id='example-graph',figure=fig,style={'width': '100%', 'display':'inline-block'}),\
+    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Squad'][parameter], histnorm='probability',nbinsx=10, bingroup=1,opacity=0.9, name="General user - Squad"),row=1,col=1)
+    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Squad'][parameter], histnorm='probability',nbinsx=10, marker_color='#707070',opacity=0.5, bingroup=1, name=df2['title'].iloc[0] + " - Squad"),row=1,col=1)
+
+    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Duo'][parameter], histnorm='probability',nbinsx=10,bingroup=7,opacity=0.9, name="General user - Duo"),row=1,col=2)
+    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Duo'][parameter], histnorm='probability',nbinsx=10,marker_color='#707070', opacity=0.5, bingroup=7,name=df2['title'].iloc[0] + " - Duo" ),row=1,col=2)
+
+    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Solo'][parameter], histnorm='probability', nbinsx=10, opacity=0.9, bingroup=2, name= "General user - Solo"),row=2,col=1)
+    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Solo'][parameter], histnorm='probability', nbinsx=10, marker_color='#707070', opacity=0.5, bingroup=2, name=df2['title'].iloc[0] + " - Solo"),row=2,col=1)
+
+    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Ranked FPP'][parameter], histnorm='probability', nbinsx=10, opacity=0.9,bingroup=3, name = "General user - Ranked FPP"),row=2,col=2)
+    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Ranked FPP'][parameter], histnorm='probability',nbinsx=10, marker_color='#707070', opacity=0.5, bingroup=3, name=df2['title'].iloc[0] + " - Ranked FPP"),row=2,col=2)
+
+    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Solo FPP'][parameter], histnorm='probability',nbinsx=10, bingroup=4, opacity=0.9, name= "General user - Solo FPP"),row=3,col=1)
+    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Solo FPP'][parameter], histnorm='probability',nbinsx=10, marker_color='#707070',opacity=0.5, bingroup=4, name=df2['title'].iloc[0] + " - Solo FPP"),row=3,col=1)
+
+    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Duo FPP'][parameter], histnorm='probability',nbinsx=10, bingroup=5,opacity=0.9, name= "General user - Duo FPP"),row=3,col=2)
+    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Duo FPP'][parameter], histnorm='probability',nbinsx=10,marker_color='#707070',opacity=0.5, bingroup=5, name=df2['title'].iloc[0] + " - Duo FPP"),row=3,col=2)
+
+    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Squad FPP'][parameter], histnorm='probability',bingroup=6,opacity=0.9,nbinsx=10, name="General user - Squad FPP"),row=4,col=1)
+    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Squad FPP'][parameter], histnorm='probability',marker_color='#707070', opacity=0.5,bingroup=6, nbinsx=10, name=df2['title'].iloc[0] + " - Squad FPP"),row=4,col=1)
+
+# Update xaxis properties
+    fig2.update_xaxes(title_text=parameter.upper(), row=1, col=1)
+    fig2.update_xaxes(title_text=parameter.upper(), row=1, col=2)
+    fig2.update_xaxes(title_text=parameter.upper(), row=2, col=1)
+    fig2.update_xaxes(title_text=parameter.upper(), row=2, col=2)
+    fig2.update_xaxes(title_text=parameter.upper(), row=3, col=1)
+    fig2.update_xaxes(title_text=parameter.upper(), row=3, col=2)
+    fig2.update_xaxes(title_text=parameter.upper(), row=4, col=1)
+
+    # Update yaxis properties
+    fig2.update_yaxes(title_text="Probability", row=1, col=1)
+    fig2.update_yaxes(title_text="Probability", row=1, col=2)
+    fig2.update_yaxes(title_text="Probability", row=2, col=1)
+    fig2.update_yaxes(title_text="Probability", row=2, col=2)
+    fig2.update_yaxes(title_text="Probability", row=3, col=1)
+    fig2.update_yaxes(title_text="Probability", row=3, col=2)
+    fig2.update_yaxes(title_text="Probability", row=4, col=1)
+
+    fig2.update_layout(title_text="Searched user data shown in grey",barmode='overlay', autosize=False,width=1500, height=1300, bargap=0.2, bargroupgap=0.3)
+
+    return html.Div([html.H3('Player : {}'.format(df2['title'].iloc[0]))]), dcc.Graph(id='example-graph',figure=fig,style={'width': '100%', 'display':'inline-block'}),\
            dcc.Graph(id='example-graph',figure=fig2), dcc.Graph(id='example-graph',figure=fig3,style={'width': '100%', 'display':'inline-block'})
 
 ####FLASK####
@@ -139,7 +179,7 @@ def check():
 
         ####Adding data analysis here #####
 
-        df=df_raw
+        df=pd.read_sql_query('select * from "all_users_raw"',con=engine).drop_duplicates(subset=['playdate', 'gametype', 'headshot', 'playtime'])
 
         df = df[df['gametype'] != 'Event']
         ##Need to create df_bin##
@@ -178,7 +218,9 @@ def check():
         df_bin=df1[cols]
 
         parameter_list = ['kill_bin','head_bin','damage_bin','kpm_bin','hpk_bin']
-        target= 10
+        target= int(0.0005*len(df_bin))
+        #print(len(df_bin))
+        #print(target)
         #print(parameter)
 
         df_bad_total = pd.DataFrame(columns=['username','parameter'])
@@ -194,6 +236,10 @@ def check():
 
             suspn = detect.detect(rating_arr, USE_TIMES, 1)
             susp_sorted = np.array([(x[0]) for x in sorted(enumerate(suspn), key=itemgetter(1), reverse=True)])
+
+            #print(susp_sorted)
+            if target >= len(susp_sorted):
+                target=len(susp_sorted)
 
             bad = susp_sorted[range(target)]
 
@@ -214,7 +260,7 @@ def check():
         check_res2 = db.execute("SELECT * from all_users_raw where lower(title) = :title", {"title": str(check).lower()})
 
         df_len_check=len(df_bad_total[df_bad_total['username'].str.lower() == check.lower()])
-        print(df_len_check)
+        #print(df_len_check)
 
         if df_len_check == 0 and check_res2.rowcount ==0:
             return render_template("data_load.html",check=check)
@@ -387,6 +433,5 @@ def search_res(username):
 
 app = DispatcherMiddleware(server, {'/mydash2': dash_app1.server})
 
-#run_simple('127.0.0.1', 8080, app, use_reloader=True, use_debugger=True)
 if __name__ == '__main__':
     server.run(debug=True)

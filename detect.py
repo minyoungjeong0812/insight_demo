@@ -65,7 +65,7 @@ def kl_denom(alpha, beta):
 
 def detect(rating_arr, use_times, K):
 	m = rating_arr.shape[0]
-	print(rating_arr)
+	#print(rating_arr)
 	rating_sums = rating_arr.sum(axis=1) + 0.1
 	#print(rating_sums)
 	rating_normal = rating_arr / rating_sums[:, np.newaxis]

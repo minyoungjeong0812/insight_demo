@@ -5,12 +5,13 @@
 {% endblock %}
 
 {% block body %}
-    <h2> The following user, <b>{{check}}</b>, has been found suspicious for the following reasons  </h2>
-    <h3> Click on the parameters to view user details </h3>
+
+    <h3 style="background-color: rgba(13, 27, 21, 0.6);"> <p style="color:#6fe309">The following user, <b>{{check}}</b>, has been found suspicious for the following reasons </p> </h3>
+    <h3 style="background-color: rgba(13, 27, 21, 0.6);"> <p style="color:#6fe309">Click on the parameters to view user details </p> </h3>
 
 <style>
 a:hover {
-  background-color: yellow;
+  background-color: black;
 }
 </style>
 
@@ -29,7 +30,7 @@ a:hover {
 
   <tbody>
     <tr>
-      <td>  <a href="{{ url_for('search_res', username=user.username) }}" style="color: red;">{{value}}</a> </td>
+      <td>  <a href="{{ url_for('search_res', username=user.username) }}" style="color: yellow;">{{value}}</a> </td>
 
     </tr>
     </tbody>

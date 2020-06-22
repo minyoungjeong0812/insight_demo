@@ -7,6 +7,7 @@ import csv
 from time import mktime
 import os
 import errno
+import time
 
 TIME_LOG_BASE = 5
 
@@ -14,7 +15,6 @@ def load_data(df_input,parameter):
 	use_products=0
 	ratings = {} # {user: [(prod, time, rating)]}
 	usermap = {}
-
 
 	if parameter == "kill":
 		parameter = "kill_bin"
@@ -34,8 +34,8 @@ def load_data(df_input,parameter):
 	df_input_new=df_input[['title','gametype','time',parameter]]
 	df_input_new=df_input_new[df_input_new[parameter] >= 4]
 
-	print(df_input_new)
-	print("ok")
+	#print(df_input_new)
+	#print("ok")
 	df_input_new['time']=df_input_new['time'].astype('int64')//1e9
 
 	rating_res=df_input_new.groupby('title')[['gametype','time',parameter]].apply(lambda x: [tuple(x) for x in x.values]).to_dict()
@@ -60,6 +60,10 @@ def process_data(ratings, dataname, use_products):
 		rating_counts = [0] * 6
 		#iat_counts = [0] * S
 		cur_ratings = sorted(ratings[user], key=operator.itemgetter(1))
+
+
+		#time.sleep(10)
+
 		rating_counts[cur_ratings[0][2] ] += 1
 		for i in range(1, len(cur_ratings)):
 			#time_diff = cur_ratings[i][1] - cur_ratings[i-1][1]

@@ -5,12 +5,12 @@
 {% endblock %}
 
 {% block body %}
-    <h2> The following user, <b>{{check}}</b>, has no suspcious record  </h2>
-    <h3> You can still check the user history by clicking the userID</h3>
+    <h3 style="background-color: rgba(13, 27, 21, 0.6);"> <p style="color:#6fe309">The following user, <b>{{check}}</b>, has no suspicious record </p> </h3>
+    <h3 style="background-color: rgba(13, 27, 21, 0.6);"> <p style="color:#6fe309"> You can still look at user history by clicking the ID below. </p> </h3>
 
 <style>
 a:hover {
-  background-color: yellow;
+  background-color: black;
 }
 </style>
 
@@ -18,7 +18,7 @@ a:hover {
 <table class="table" style="background-color: rgba(13, 27, 21, 0.6);">
     <thead>
       <tr>
-        <th style="color: red;"> UserID </th>
+        <th style="color: yellow;"> UserID </th>
 
       </tr>
     </thead>
@@ -26,8 +26,8 @@ a:hover {
     <tbody>
       <tr>
 
-        <td>  <a href="{{ url_for('search_res', username=check) }}" style="color: red;">{{check}}</a> </td>
-        
+        <td>  <a href="{{ url_for('search_res', username=check) }}" style="color: yellow;">{{check}}</a> </td>
+
       </tr>
 
     </tbody>
