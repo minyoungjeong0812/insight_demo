@@ -1,1 +1,0 @@
-templates folder for flask

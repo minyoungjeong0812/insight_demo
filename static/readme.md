@@ -1,1 +1,0 @@
-static folder for flask
