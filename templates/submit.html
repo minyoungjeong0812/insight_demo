@@ -1,0 +1,24 @@
+{% extends "layout2.html" %}
+
+{% block title %}
+    Upload your file
+{% endblock %}
+
+{%block content%}
+    <h2 style="color: black"> Submit new player stats </h2>
+<h3 style="color: black"> (supports *.csv format) </h3>
+{%endblock%}
+
+
+{%block body%}
+<body stye ='color : red'>
+<form method=post enctype=multipart/form-data>
+    <div class="search_post">
+    <input type=file name=file>
+    <input type=submit value=Upload>
+</form>
+    <div class="search_post">
+</body>
+</html>
+
+{%endblock%}

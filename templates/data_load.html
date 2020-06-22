@@ -1,0 +1,27 @@
+{% extends "layout2.html" %}
+
+{% block title %}
+    Looks like your user data is not in our database..
+{% endblock %}
+
+{%block content%}
+<div class=progress>
+    <h3> <p style="color:#6fe309"> <b>{{check}}</b> is not in our database </p> </h3>
+<h3> <p style="color:#6fe309"> Want to load data in?? </p> </h3>
+</div>
+{%endblock%}
+
+
+{%block body%}
+
+<form action = "{{url_for('data_load')}}" method="post">
+  <input type="hidden" id="custId" name="custId" value={{check}}>
+    <input type="submit" value="Yes">
+</form>
+
+<button type="button" onclick="window.location.href='{{ url_for( 'home' ) }}';"> No </button>
+
+
+</html>
+
+{%endblock%}
