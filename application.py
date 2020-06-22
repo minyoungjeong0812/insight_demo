@@ -11,9 +11,6 @@ from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup as bs
 
 
-import prac2
-import prac
-
 import preprocess
 import detect
 
