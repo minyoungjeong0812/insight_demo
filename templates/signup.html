@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+
+<%block title%>
+Member signup
+<%endblock>
+
+{%block body%}
+<h1> Sign up! </h1>
+<form action = "{{url_for('signup')}}" method="post">
+	<div class="user">
+		<input class ="user_login" name="userID" placeholder="Your ID">
+	</div>
+
+	<div class="user">
+		<input type="password" class ="user_login" name="userPW" placeholder="Your Password">
+	</div>
+
+	<div class="user">
+		<button class="btn btn-primary">Sign up</button>
+	</div>
+</form>	
+{%endblock%}
