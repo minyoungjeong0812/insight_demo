@@ -14,5 +14,7 @@
 
 * __Validation data (pro)__ : The question then can arise if my model would just catch those who happen to be good like pro gamers. So to validate my model behavior, I collected PUBG pro gamers data by manually looking up some of the well known pro gamers data (like chocoTaco) on PUBG.OP.GG.
 
+* __Model__ : 
+
 * __Building the app__ : I used flask to build the web app that is deployed on Heroku server at www.PUBG-CHEATER-FINDER.com . The "application.py" code contains all the lines of the code that were used to build the web app.
-  - __Layout of the app__
+  - __Layout of the app__ :
