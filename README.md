@@ -16,4 +16,4 @@
 
 * __Building the app__ : I used flask to build the web app that is deployed on Heroku server at www.PUBG-CHEATER-FINDER.com . The "application.py" code contains all the lines of the code that were used to build the web app.
 
-** __Layout of the app__ **
+  -- __Layout of the app__ **
