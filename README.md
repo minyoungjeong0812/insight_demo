@@ -14,7 +14,7 @@
 
 * __Validation data (pro)__ : The question then can arise if my model would just catch those who happen to be good like pro gamers. So to validate my model behavior, I collected PUBG pro gamers data by manually looking up some of the well known pro gamers data (like chocoTaco) on PUBG.OP.GG.
 
-* __Model__ : Because players play on different times
+* __Model__ : Because players play on different times, I cannot simply use typical time series analysis. For example, let's assume user A played on 1/1/2020 and 1/3/2020 and user B played 1/2/2020 only. Then assume user A had made 0 kills on 1/1 and 2 kills on 1/3. Then, if user B made 10 kills on 1/2
 
 * __Building the app__ : I used flask to build the web app that is deployed on Heroku server at www.PUBG-CHEATER-FINDER.com . The "application.py" code contains all the lines of the code that were used to build the web app.
   - __Layout of the app__ : 
