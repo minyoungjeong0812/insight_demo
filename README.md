@@ -22,5 +22,7 @@
   - __Model operation :__ My model looks for those deviated the most, and my threshold was top 1%. The reason being most of the well-known PUBG pro players tend to be ~ top 1.5%, and according to my EDA cheaters generally have ~2X more likelihood to acheive higher kills or higher damage even than the pros. Thus, I chose 1% as a threshold.
 
 * __Building the app__ : I used flask to build the web app that is deployed on Heroku server at www.PUBG-CHEATER-FINDER.com . The "application.py" code contains all the lines of the code that were used to build the web app.
-  - __Layout of the app__ : 
+  - __Layout of the app__ : Will put in here soon.
 --
+
+* __File description__ : The description for each file is as follows.
