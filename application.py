@@ -59,7 +59,7 @@ dash_app1.layout = html.Div([
     # represents the URL bar, doesn't render anything
     dcc.Location(id='url', refresh=False),
 
-	html.H2('All user data + Searched player data'),
+	html.H2('General user data + Searched player data'),
 
     html.Div([
     dcc.Dropdown(id='yaxis-column',options=[{'label': i.upper(), 'value': i} for i in available_indicators],
@@ -118,26 +118,26 @@ def display_page(pathname,parameter):
     rows=4, cols=2,shared_xaxes=False, vertical_spacing=0.1,
     subplot_titles=("Squad", "Duo", "Solo", "Ranked FPP","Solo FPP","Duo FPP","Squad FPP"))
 
-    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Squad'][parameter], histnorm='probability',nbinsx=10, bingroup=1,opacity=0.9, name="General user - Squad"),row=1,col=1)
-    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Squad'][parameter], histnorm='probability',nbinsx=10, marker_color='#707070',opacity=0.5, bingroup=1, name=df2['title'].iloc[0] + " - Squad"),row=1,col=1)
+    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Squad'][parameter], histnorm='probability',nbinsx=10, marker_color='#707070',opacity=0.9,bingroup=1, name="General user - Squad"),row=1,col=1)
+    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Squad'][parameter], histnorm='probability',nbinsx=10, marker_color='#f00800',opacity=0.9, bingroup=1, name=df2['title'].iloc[0] + " - Squad"),row=1,col=1)
 
-    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Duo'][parameter], histnorm='probability',nbinsx=10,bingroup=7,opacity=0.9, name="General user - Duo"),row=1,col=2)
-    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Duo'][parameter], histnorm='probability',nbinsx=10,marker_color='#707070', opacity=0.5, bingroup=7,name=df2['title'].iloc[0] + " - Duo" ),row=1,col=2)
+    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Duo'][parameter], histnorm='probability',nbinsx=10,bingroup=7,marker_color='#707070',opacity=0.9, name="General user - Duo"),row=1,col=2)
+    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Duo'][parameter], histnorm='probability',nbinsx=10,marker_color='#f00800',opacity=0.9, bingroup=7,name=df2['title'].iloc[0] + " - Duo" ),row=1,col=2)
 
-    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Solo'][parameter], histnorm='probability', nbinsx=10, opacity=0.9, bingroup=2, name= "General user - Solo"),row=2,col=1)
-    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Solo'][parameter], histnorm='probability', nbinsx=10, marker_color='#707070', opacity=0.5, bingroup=2, name=df2['title'].iloc[0] + " - Solo"),row=2,col=1)
+    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Solo'][parameter], histnorm='probability', nbinsx=10, marker_color='#707070',opacity=0.9, bingroup=2, name= "General user - Solo"),row=2,col=1)
+    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Solo'][parameter], histnorm='probability', nbinsx=10, marker_color='#f00800',opacity=0.9, bingroup=2, name=df2['title'].iloc[0] + " - Solo"),row=2,col=1)
 
-    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Ranked FPP'][parameter], histnorm='probability', nbinsx=10, opacity=0.9,bingroup=3, name = "General user - Ranked FPP"),row=2,col=2)
-    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Ranked FPP'][parameter], histnorm='probability',nbinsx=10, marker_color='#707070', opacity=0.5, bingroup=3, name=df2['title'].iloc[0] + " - Ranked FPP"),row=2,col=2)
+    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Ranked FPP'][parameter], histnorm='probability', nbinsx=10, marker_color='#707070',opacity=0.9,bingroup=3, name = "General user - Ranked FPP"),row=2,col=2)
+    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Ranked FPP'][parameter], histnorm='probability',nbinsx=10, marker_color='#f00800',opacity=0.9, bingroup=3, name=df2['title'].iloc[0] + " - Ranked FPP"),row=2,col=2)
 
-    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Solo FPP'][parameter], histnorm='probability',nbinsx=10, bingroup=4, opacity=0.9, name= "General user - Solo FPP"),row=3,col=1)
-    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Solo FPP'][parameter], histnorm='probability',nbinsx=10, marker_color='#707070',opacity=0.5, bingroup=4, name=df2['title'].iloc[0] + " - Solo FPP"),row=3,col=1)
+    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Solo FPP'][parameter], histnorm='probability',nbinsx=10, bingroup=4, marker_color='#707070',opacity=0.9, name= "General user - Solo FPP"),row=3,col=1)
+    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Solo FPP'][parameter], histnorm='probability',nbinsx=10, marker_color='#f00800',opacity=0.9, bingroup=4, name=df2['title'].iloc[0] + " - Solo FPP"),row=3,col=1)
 
-    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Duo FPP'][parameter], histnorm='probability',nbinsx=10, bingroup=5,opacity=0.9, name= "General user - Duo FPP"),row=3,col=2)
-    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Duo FPP'][parameter], histnorm='probability',nbinsx=10,marker_color='#707070',opacity=0.5, bingroup=5, name=df2['title'].iloc[0] + " - Duo FPP"),row=3,col=2)
+    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Duo FPP'][parameter], histnorm='probability',nbinsx=10, bingroup=5,marker_color='#707070',opacity=0.9, name= "General user - Duo FPP"),row=3,col=2)
+    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Duo FPP'][parameter], histnorm='probability',nbinsx=10, marker_color='#f00800',opacity=0.9, bingroup=5, name=df2['title'].iloc[0] + " - Duo FPP"),row=3,col=2)
 
-    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Squad FPP'][parameter], histnorm='probability',bingroup=6,opacity=0.9,nbinsx=10, name="General user - Squad FPP"),row=4,col=1)
-    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Squad FPP'][parameter], histnorm='probability',marker_color='#707070', opacity=0.5,bingroup=6, nbinsx=10, name=df2['title'].iloc[0] + " - Squad FPP"),row=4,col=1)
+    fig2.append_trace(go.Histogram(x=df[df['gametype']=='Squad FPP'][parameter], histnorm='probability',bingroup=6,marker_color='#707070',opacity=0.9,nbinsx=10, name="General user - Squad FPP"),row=4,col=1)
+    fig2.add_trace(go.Histogram(x=df2[df2['gametype']=='Squad FPP'][parameter], histnorm='probability',marker_color='#f00800',opacity=0.9,bingroup=6, nbinsx=10, name=df2['title'].iloc[0] + " - Squad FPP"),row=4,col=1)
 
 # Update xaxis properties
     fig2.update_xaxes(title_text=parameter.upper(), row=1, col=1)
@@ -157,7 +157,7 @@ def display_page(pathname,parameter):
     fig2.update_yaxes(title_text="Probability", row=3, col=2)
     fig2.update_yaxes(title_text="Probability", row=4, col=1)
 
-    fig2.update_layout(title_text="Searched user data shown in grey",barmode='overlay', autosize=False,width=1500, height=1300, bargap=0.2, bargroupgap=0.3)
+    fig2.update_layout(showlegend=False,title_text="Searched user (RED) vs General user (Grey)", autosize=False,width=1500, height=1300, bargap=0.2, bargroupgap=0.3)
 
     return html.Div([html.H3('Player : {}'.format(df2['title'].iloc[0]))]), dcc.Graph(id='example-graph',figure=fig,style={'width': '100%', 'display':'inline-block'}),\
            dcc.Graph(id='example-graph',figure=fig2), dcc.Graph(id='example-graph',figure=fig3,style={'width': '100%', 'display':'inline-block'})
@@ -175,9 +175,11 @@ def check():
         check=request.form.get('check')
 
         ####Adding data analysis here #####
+        print("getting data")
+        #df=pd.read_sql_query('select * from "all_users_raw"',con=engine).drop_duplicates(subset=['playdate', 'gametype', 'headshot', 'playtime'])
+        df=pd.read_sql_query('select kill,headshot,damage,playtime,title,playdate,gametype from "all_users_raw"',con=engine).drop_duplicates(subset=['playdate', 'gametype', 'headshot', 'playtime'])
 
-        df=pd.read_sql_query('select * from "all_users_raw"',con=engine).drop_duplicates(subset=['playdate', 'gametype', 'headshot', 'playtime'])
-
+        print("read data")
         df = df[df['gametype'] != 'Event']
         ##Need to create df_bin##
         bins = [-np.inf, 1, 3, 6, 8, 10, np.inf]
@@ -188,31 +190,32 @@ def check():
 
         df['head_per_kill']=df['headshot']/df['kill']
 
-        df1=df.drop(['dbno','assists','heal','boost','revive'],axis=1)
+        #df1=df
+        #df1=df.drop(['dbno','assists','heal','boost','revive'],axis=1)
 
-        df1['head_per_kill']=df1['head_per_kill'].fillna(0)
+        df['head_per_kill']=df['head_per_kill'].fillna(0)
 
         bins = [-np.inf, 1, 2, 3, 4, 5, np.inf]
         labels = [0,1,2,3,4,5]
-        df1['head_bin'] = pd.cut(df1['headshot'], bins=bins, labels=labels)
+        df['head_bin'] = pd.cut(df['headshot'], bins=bins, labels=labels)
 
         bins = [-np.inf, 100, 200, 300, 400, 500, np.inf]
         labels = [0,1,2,3,4,5]
-        df1['damage_bin'] = pd.cut(df1['damage'], bins=bins, labels=labels)
+        df['damage_bin'] = pd.cut(df['damage'], bins=bins, labels=labels)
 
         bins = [-np.inf, 0.1, 0.2, 0.4, 0.6 , 0.8, np.inf]
         labels = [0,1,2,3,4,5]
-        df1['hpk_bin'] = pd.cut(df1['head_per_kill'], bins=bins, labels=labels)
+        df['hpk_bin'] = pd.cut(df['head_per_kill'], bins=bins, labels=labels)
 
 
         bins = [-np.inf, 0.1, 0.2, 0.3, 0.4 , 0.5, np.inf]
         labels = [0,1,2,3,4,5]
-        df1['kpm_bin'] = pd.cut(df1['kill_per_min'], bins=bins, labels=labels)
-        df1['time']=pd.to_datetime(df['playdate'], infer_datetime_format=True)
+        df['kpm_bin'] = pd.cut(df['kill_per_min'], bins=bins, labels=labels)
+        df['time']=pd.to_datetime(df['playdate'], infer_datetime_format=True)
 
         cols=['gametype','head_bin','title','kill_bin','damage_bin','kpm_bin','hpk_bin','time']
 
-        df_bin=df1[cols]
+        df_bin=df[cols]
 
         parameter_list = ['kill_bin','head_bin','damage_bin','kpm_bin','hpk_bin']
         target= int(0.0005*len(df_bin))
@@ -257,7 +260,7 @@ def check():
         check_res2 = db.execute("SELECT * from all_users_raw where lower(title) = :title", {"title": str(check).lower()})
 
         df_len_check=len(df_bad_total[df_bad_total['username'].str.lower() == check.lower()])
-        #print(df_len_check)
+        print(df_len_check)
 
         if df_len_check == 0 and check_res2.rowcount ==0:
             return render_template("data_load.html",check=check)
