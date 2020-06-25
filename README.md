@@ -29,3 +29,6 @@
    - import.py : getting rows and columns from scraped data that are in a csv format and inserting them to Heroku SQL database
    - models.py : creating relational database schema for scraped user data
    - create.py : initiating Heroku SQL database to create database schema as defined by models.py
+   - scrape.py : scraping user data using Selenium and Beautifulsoup on PUBG.OP.GG
+   - preprocess.py : creating bins for each user parameter and saving the occurences of each bin in a dictionary for each user. Then creating arrays to count the occurences (how many times a sepcific bin for a given parameter had happend for a specific user)
+   - detect.py : main code to go through Bayesian infernce and detect the top deviators. Code is commented for details.
