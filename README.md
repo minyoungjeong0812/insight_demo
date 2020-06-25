@@ -26,3 +26,6 @@
 --
 
 * __File description__ : The description for each file is as follows.
+ - import.py : getting rows and columns from scraped data that are in a csv format and inserting them to Heroku SQL database
+ - models.py : creating relational database schema for scraped user data
+ - create.py : initiating Heroku SQL database to create database schema as defined by models.py
