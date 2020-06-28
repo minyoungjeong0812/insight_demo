@@ -1,3 +1,5 @@
+#loading neccessary packages in
+
 import pandas as pd
 import os
 
@@ -33,11 +35,6 @@ import dash_html_components as html
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 server = Flask(__name__)
-#DESKTOP
-
-##server._static_folder = "/home/minyoung/Documents/insight_week2/static"
-
-#LAPTOP
 
 # Configure session to use filesystem
 server.config["SESSION_PERMANENT"] = False
@@ -49,9 +46,10 @@ engine = create_engine(
     "postgres://ksfkoirmqqkghq:8843ee1b00e9df0948a10b662918ce11131f75859826aca4fecae08f088fdc8e@ec2-52-207-25-133.compute-1.amazonaws.com:5432/d6k5uvvu11hsqa")
 db = scoped_session(sessionmaker(bind=engine))
 
-
+#indicators for dropdown
 available_indicators = ['kill','headshot','kill_per_min','headshot_per_kill','damage']
-######################
+
+#dash app for 
 dash_app1 = dash.Dash(__name__, server=server, url_base_pathname='/dashboard1/', external_stylesheets=external_stylesheets)
 
 # dash_app1 : my own again
