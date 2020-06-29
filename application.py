@@ -34,6 +34,7 @@ import dash_html_components as html
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
+#initiating flask
 server = Flask(__name__)
 
 # Configure session to use filesystem
@@ -46,17 +47,16 @@ engine = create_engine(
     "postgres://ksfkoirmqqkghq:8843ee1b00e9df0948a10b662918ce11131f75859826aca4fecae08f088fdc8e@ec2-52-207-25-133.compute-1.amazonaws.com:5432/d6k5uvvu11hsqa")
 db = scoped_session(sessionmaker(bind=engine))
 
-#indicators for dropdown
+#indicators for dropdown on dash web app page
 available_indicators = ['kill','headshot','kill_per_min','headshot_per_kill','damage']
 
-#dash app for 
+#dash app creation
 dash_app1 = dash.Dash(__name__, server=server, url_base_pathname='/dashboard1/', external_stylesheets=external_stylesheets)
 
-# dash_app1 : my own again
 dash_app1.layout = html.Div([
     # represents the URL bar, doesn't render anything
     dcc.Location(id='url', refresh=False),
-
+	
 	html.H2('General user data + Searched player data'),
 
     html.Div([
