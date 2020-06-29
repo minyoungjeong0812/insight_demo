@@ -6,32 +6,6 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
-# class all_users(db.Model):
-# 	__tablename__ = "all_users"
-# 	key = db.Column(db.Integer, primary_key=True)
-
-
-# 	gametype = db.Column(db.String, nullable=False)
-
-# 	head_bin = db.Column(db.Integer, nullable=False)
-
-# 	title = db.Column(db.String, nullable=False)
-
-# 	username = db.Column(db.String, nullable=False)
-
-# 	kill_bin = db.Column(db.Integer, nullable=False)
-
-# 	damage_bin = db.Column(db.Integer, nullable=False)
-
-# 	kpm_bin = db.Column(db.Integer, nullable=False)
-
-# 	hpk_bin = db.Column(db.Integer, nullable=False)
-
-# 	dist_bin = db.Column(db.Integer, nullable=False)
-
-# 	playdate = db.Column(db.DateTime, nullable=False)
-
-
 class all_users_raw(db.Model):
 	__tablename__ = "all_users_raw"
 	key = db.Column(db.Integer, primary_key=True)
@@ -65,4 +39,3 @@ class all_users_raw(db.Model):
 	boost = db.Column(db.Integer, nullable=False)
 
 	revive = db.Column(db.Integer, nullable=False)
-
