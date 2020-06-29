@@ -1,3 +1,4 @@
+#loading neccessary pacakages in
 import numpy as np
 import operator
 import dill as pickle
@@ -9,11 +10,10 @@ import os
 import errno
 import time
 
-TIME_LOG_BASE = 5
 
 def load_data(df_input,parameter):
-	use_products=0
-	ratings = {} # {user: [(prod, time, rating)]}
+	#creating empty dictionaries to store user parameter (rating) info and user info
+	ratings = {}
 	usermap = {}
 
 	if parameter == "kill":
@@ -32,16 +32,17 @@ def load_data(df_input,parameter):
 		parameter = "hpk_bin"
 
 	df_input_new=df_input[['title','gametype','time',parameter]]
+
+	#selecting records where their user parameter bins are greater than 4.
 	df_input_new=df_input_new[df_input_new[parameter] >= 4]
 
-	#print(df_input_new)
-	#print("ok")
 	df_input_new['time']=df_input_new['time'].astype('int64')//1e9
 
+	#converting user parameter dataframe to dicitonary
 	rating_res=df_input_new.groupby('title')[['gametype','time',parameter]].apply(lambda x: [tuple(x) for x in x.values]).to_dict()
 
+	#converting user info dataframe to dictionary
 	df_input_title=df_input[['title']]
-	#print(df_input_title)
 	user_res = dict(zip(df_input.title, df_input.title))
 
 	ratings=rating_res
@@ -50,33 +51,30 @@ def load_data(df_input,parameter):
 	return ratings, usermap
 
 def process_data(ratings, dataname, use_products):
-	keyword = 'prod' if use_products else 'user'
-	rating_arr = []
 
+	#creating empty lists for user parameter (rating) and id
+	rating_arr = []
 	ids = []
 
+	#looping over users
 	for user in ratings:
 		if len(ratings[user]) <= 1: continue
+		# creating list to count occurences of each bin
 		rating_counts = [0] * 6
-		#iat_counts = [0] * S
+
+		#sort the ratings dictionary
 		cur_ratings = sorted(ratings[user], key=operator.itemgetter(1))
 
-
-		#time.sleep(10)
-
+		#add +1 for a specific bin if it existed in the ratings dicitionary
 		rating_counts[cur_ratings[0][2] ] += 1
+
+		#looping over each user's rating
 		for i in range(1, len(cur_ratings)):
-			#time_diff = cur_ratings[i][1] - cur_ratings[i-1][1]
-			#iat_bucket = int(math.floor(math.log(1 + time_diff, TIME_LOG_BASE)))
 			rating_counts[cur_ratings[i][2] ] += 1
-			#iat_counts[iat_bucket] += 1
+
 		rating_arr.append(rating_counts)
-		#iat_arr.append(iat_counts)
 		ids.append(user)
 
 	rating_arr = np.array(rating_arr)
-	#iat_arr = np.array(iat_arr)
-	return (rating_arr, ids)
 
-#pic_load_data = pickle.dumps (load_data)
-##rating,user = pickle.loads(pic_load_data)(df,para)
+	return (rating_arr, ids)
